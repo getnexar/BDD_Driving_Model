@@ -239,7 +239,7 @@ class MyDataset(Dataset):
             return self.decode_jpeg_original(image_buffer, scope)
 
     def decode_jpeg_original(self, image_buffer, scope=None):
-        with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+        with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
             # decode jpeg
             fn = lambda encoded: tf.image.decode_jpeg(encoded,
                                                       channels=3,
@@ -263,7 +263,7 @@ class MyDataset(Dataset):
             return decoded
 
     def decode_jpeg_concat(self, image_buffer, scope=None):
-        with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+        with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
             length = image_buffer.get_shape()[0].value
             all = []
             for i in range(length):
@@ -271,14 +271,14 @@ class MyDataset(Dataset):
                                      channels=3,
                                      ratio=FLAGS.decode_downsample_factor)
                 all.append(tf.expand_dims(decoded, 0))
-            images = tf.concat(0, all)
+            images = tf.concat(all, 0)
             images.set_shape([FLAGS.FRAMES_IN_SEG // FLAGS.temporal_downsample_factor,
                                FLAGS.IM_HEIGHT / FLAGS.decode_downsample_factor,
                                FLAGS.IM_WIDTH / FLAGS.decode_downsample_factor, 3])
             return images
 
     def decode_jpeg_batch(self, image_buffer, scope=None):
-        with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+        with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
             length = image_buffer.get_shape()[0].value
             queue=tf.train.string_input_producer(
                 image_buffer,
@@ -330,7 +330,7 @@ class MyDataset(Dataset):
         return ans
 
     def decode_jpeg_python(self, image_buffer, scope=None):
-        with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+        with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
             cN = FLAGS.FRAMES_IN_SEG // FLAGS.temporal_downsample_factor
             cH = FLAGS.IM_HEIGHT // FLAGS.decode_downsample_factor
             cW = FLAGS.IM_WIDTH // FLAGS.decode_downsample_factor
@@ -606,7 +606,7 @@ class MyDataset(Dataset):
 
 
     def decode_png(self, image_buffer, scope=None):
-        with tf.op_scope([image_buffer], scope, 'decode_png'):
+        with tf.name_scope(scope, 'decode_png', [image_buffer]):
             # decode PNG
             fn = lambda encoded: tf.image.decode_png(encoded,
                                                       channels=1)
@@ -892,7 +892,7 @@ class MyDataset(Dataset):
         if not FLAGS.no_image_input:
             decoded = net_inputs[0]
             visualize = tf.cast(decoded[0,:,:,:,:], tf.uint8)
-            tf.image_summary("video_seq", visualize, max_images=FLAGS.n_sub_frame)
+            tf.summary.image("video_seq", visualize, max_outputs=FLAGS.n_sub_frame)
 
     def augmentation(self, is_train, net_inputs, net_outputs):
         # augment the network input tensors and output tensors by whether is_train

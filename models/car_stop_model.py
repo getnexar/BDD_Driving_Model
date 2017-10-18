@@ -212,7 +212,7 @@ def inference(net_inputs, num_classes, for_training=False, scope=None, initial_s
                 # the args left for fc: input, num_outputs
                 with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], padding='VALID'):
                     # the args left for *_pool2d: kernel_size, stride
-                    with tf.op_scope([net_inputs], scope, FLAGS.arch_selection) as sc:
+                    with tf.name_scope(scope, FLAGS.arch_selection, [net_inputs]) as sc:
                         end_points_collection = sc + '_end_points'
                         with slim.arg_scope([slim.conv2d, slim.fully_connected,
                                              slim.max_pool2d, slim.avg_pool2d,
@@ -389,7 +389,7 @@ def LRCN(net_inputs, num_classes, for_training, initial_state=None):
                     all_features[i] = tf.nn.l2_normalize(all_features[i], 2)
 
         # all_features have shape: B, F, #features
-        all_features = tf.concat(2, all_features)
+        all_features = tf.concat(all_features, 2)
         ############# the RNN temporal part #############
         # get hidden layer config from commandline
         if FLAGS.dropout_LSTM_keep_prob > 0:
@@ -501,7 +501,7 @@ def LRCN(net_inputs, num_classes, for_training, initial_state=None):
             output = cur_inp
             ################Final Classification#################
             # concatentate outputs into a single tensor, the output size is (batch*nframe, H', W', C')
-            #hidden_out = tf.concat(0, output, name='concat_rnn_outputs')
+            #hidden_out = tf.concat(output, name='concat_rnn_outputs', 0)
             # remove the spatio dimensions to be compatible with the code before
             #hidden_out = tf.reshape(hidden_out, [shape[0]*shape[1], -1])
 
@@ -617,7 +617,7 @@ def privileged_training(net_inputs, num_classes, for_training, stage_status, ima
 
             pred = tf.image.resize_nearest_neighbor(pred,[shape[2], shape[3]])
             city_ims = tf.cast(city_ims, tf.uint8)
-            pred = tf.concat(2,[city_ims, pred])
+            pred = tf.concat([city_ims, pred], 2)
 
             tf.image_summary("segmentation_visualization", pred, max_images=113)
 
@@ -675,7 +675,7 @@ def loss_car_discrete(logits, net_outputs, batch_size=None):
         mask = 1.0
 
     # Cross entropy loss for the main softmax prediction.
-    slim.losses.softmax_cross_entropy(logits[0], dense_labels, weight=mask)
+    tf.losses.softmax_cross_entropy(dense_labels, logits[0], weights=mask)
 
 ##################### Loss Functions of the continous discritized #########
 # helper function

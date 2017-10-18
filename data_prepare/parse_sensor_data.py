@@ -3,6 +3,10 @@ from pprint import pprint
 import numpy as np
 import math
 
+from scipy.interpolate import interp1d
+from copy import deepcopy
+
+
 def read_json(json_path, video_filename):
     with open(json_path) as data_file:    
         seg = json.load(data_file)
@@ -55,6 +59,27 @@ def read_json(json_path, video_filename):
         return None
 
     return res
+
+
+def read_csv(sensor_file_path, start_time, end_time):
+    cur_sensor_list = []
+    cur_time_list = []
+
+    file_in = open(sensor_file_path)
+    line = file_in.readline()
+    while len(line) > 0:
+        elems = line.split(',')
+        cur_time = float(elems[0])
+        sensor_data = map(float, elems[1:])
+        if ((int(elems[0]) > start_time) and (int(cur_time) < end_time)):
+            cur_sensor_list.append(deepcopy(sensor_data))
+            cur_time_list.append(cur_time)
+
+        line = file_in.readline()
+
+    if (len(cur_sensor_list) < 2):
+        return None, None
+    return cur_sensor_list, cur_time_list
 
 
 def fill_missing_speeds_and_courses(values, show_warning):
@@ -119,9 +144,48 @@ def get_interpolated_speed_xy(res, hz=15):
             out[i, :] = inter
     return out
 
-def get_interpolated_speed(json_path, video_filename, hz):
+
+def get_interpolated_sensor_data(json_path, acc_path, video_filename, hz):
     res = read_json(json_path, video_filename)
     if res is None:
         return None
-    out = get_interpolated_speed_xy(res, hz)
+    speeds = get_interpolated_speed_xy(res, hz)
+    acc = get_interpolated_acc(acc_path, speeds.shape[0], hz, res['startTime'], res['endTime'])
+
+    return speeds, acc
+
+
+def get_interpolated_acc(acc_path, speed_vec_size, sample_num, start_time, end_time):
+    sensor_list, timestamp_list = read_csv(acc_path, start_time, end_time)
+    if ((sensor_list is None) or (timestamp_list is None)):
+        return None
+    out = get_interpolated_acc_xy(sensor_list, timestamp_list, speed_vec_size, sample_num)
     return out
+
+
+def get_interpolated_acc_xy(cur_sensorlist, cur_timelist, speed_vec_size, sample_num):
+    cur_sensorlist_org = np.array(cur_sensorlist).T
+    cur_timelist_org = np.array(cur_timelist)
+
+    cur_sensor_list = cur_sensorlist_org + 0.
+    cur_timelist = cur_timelist_org + 0.
+
+    if cur_timelist[-1] < speed_vec_size:
+        cur_timelist[-1] = speed_vec_size
+    if cur_timelist[0] > 0.:
+        cur_timelist[0] = 0.
+
+    sensor_interp = interp1d(cur_timelist, cur_sensor_list)
+    sensor_interp_time = np.linspace(0.0, speed_vec_size, sample_num)
+    res = sensor_interp(sensor_interp_time)
+
+    return res
+    # sensorFFT = fft(sensorInterpVal).T
+    # sensorFFTSamp = sensorFFT[::1] / float(1)
+    # sensorFFTFin = []
+    # for sensorFFTElem in sensorFFTSamp:
+    #     for axisElem in sensorFFTElem:
+    #         sensorFFTFin.append(axisElem.real)
+    #         sensorFFTFin.append(axisElem.imag)
+    #
+    # return sensorFFTFin, True

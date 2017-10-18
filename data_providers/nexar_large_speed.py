@@ -858,7 +858,7 @@ class MyDataset(Dataset):
             ins += [city_im]
             outs += [city_seg]
         if FLAGS.only_seg == 1:
-            ins = ins + batched[5:7]
+            ins = ins + batched[6:8]
             outs = outs
 
         # adding the raw images

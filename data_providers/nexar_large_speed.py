@@ -699,6 +699,7 @@ class MyDataset(Dataset):
         feature_map = {
                 'image/encoded': tf.VarLenFeature(dtype=tf.string),
                 'image/speeds': tf.VarLenFeature(dtype=tf.float32),
+                'image/acc': tf.VarLenFeature(dtype=tf.float32),
                 'image/class/video_name': tf.FixedLenFeature([1], dtype=tf.string, default_value=''),
         }
         if FLAGS.only_seg == 1:
@@ -762,6 +763,12 @@ class MyDataset(Dataset):
         speed = speed[tstart::FLAGS.temporal_downsample_factor, :]
         speed.set_shape([len_downsampled, 2])
 
+        acc = features['image/acc'].values
+        acc = tf.reshape(acc, [-1, 2])
+        acc = acc[:FLAGS.FRAMES_IN_SEG, :]
+        acc = acc[tstart::FLAGS.temporal_downsample_factor, :]
+        acc.set_shape([len_downsampled, 2])
+
         # from speed to stop labels
         stop_label = tf.py_func(self.speed_to_future_has_stop,
                                 [speed, FLAGS.stop_future_frames, FLAGS.speed_limit_as_stop],
@@ -804,19 +811,19 @@ class MyDataset(Dataset):
 
 
         # batching one 10 second segments into several smaller segments
-        batching_inputs = [decoded, speed, stop_label, turn, locs]
+        batching_inputs = [decoded, speed, acc, stop_label, turn, locs]
         if FLAGS.only_seg == 1:
             batching_inputs += [seg_decoded, ctx_decoded]
-            decoded_raw_loc = 7
+            decoded_raw_loc = 8
         else:
-            decoded_raw_loc = 5
+            decoded_raw_loc = 6
         batching_inputs += [decoded_raw]
         batched = [self.batching(x, len_downsampled) for x in batching_inputs]
 
         name = tf.tile(name, [batched[0].get_shape()[0].value])
 
-        ins = batched[0:2] + [name]
-        outs = batched[2:5]
+        ins = batched[0:3] + [name]
+        outs = batched[3:6]
         if FLAGS.city_data:
             # city batch means how many batch does each video sequence forms
             FLAGS.city_batch = len_downsampled // FLAGS.n_sub_frame

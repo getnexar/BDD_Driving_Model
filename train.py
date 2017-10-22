@@ -132,7 +132,7 @@ def _tower_loss(inputs, outputs, num_classes, scope):
 
   # Assemble all of the losses for the current tower only.
   #losses = tf.get_collection(slim.losses.LOSSES_COLLECTION, scope)
-  losses = slim.losses.get_losses(scope)
+  losses = tf.losses.get_losses(scope)
 
   # Calculate the total loss for the current tower.
   regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
@@ -343,7 +343,7 @@ def train():
                     grad_var_list = None
 
           # Reuse variables for the next tower.
-          tf.get_variable_scope().reuse_variables()
+          ##Hanna - tf.get_variable_scope().reuse_variables()
 
           # Retain the summaries from the final tower.
           summaries = tf.get_collection(tf.GraphKeys.SUMMARIES, scope)
@@ -439,10 +439,10 @@ def train():
                         batchnorm_updates_op)
 
     # Create a saver.
-    saver = tf.train.Saver(tf.all_variables())
+    saver = tf.train.Saver(tf.global_variables())
 
     # Build the summary operation from the last tower summaries.
-    summary_op = tf.merge_summary(summaries)
+    summary_op = tf.summary.merge(summaries)
 
     # Build an initialization operation to run below.
     init = tf.global_variables_initializer()
@@ -491,9 +491,9 @@ def train():
     tf.train.start_queue_runners(sess=sess)
     
 
-    summary_writer = tf.train.SummaryWriter(
+    summary_writer = tf.summary.FileWriter(
         FLAGS.train_dir,
-        graph_def=sess.graph.as_graph_def(add_shapes=True))
+        graph=sess.graph.as_graph_def(add_shapes=True))
 
     start_time = time.time()
     duration_compute=0

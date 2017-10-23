@@ -250,7 +250,7 @@ def car_discrete(logits_all, labels_in, loss_op, sess, coord, summary_op, tensor
   summary = tf.Summary()
   need_summary_every_batch = False
 
-  init_op = tf.initialize_local_variables()
+  init_op = tf.local_variables_initializer()
   sess.run(init_op)
 
   num_iter = int(math.ceil(FLAGS.num_examples / FLAGS.batch_size))

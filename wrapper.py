@@ -84,8 +84,13 @@ class Wrapper:
             self.state_value=[[np.zeros((1, int(FLAGS.lstm_hidden_units)), dtype=np.float32),
                                np.zeros((1, int(FLAGS.lstm_hidden_units)), dtype=np.float32)]]
 
-        init_op = tf.initialize_local_variables()
+        init_op = tf.local_variables_initializer()
         self.sess.run(init_op)
+
+    def reset(self):
+        self.latest_frames = []
+        for _ in range(self.truncate_len):
+            self.latest_frames.append(np.zeros((IMSZ, IMSZ, 3), dtype=np.uint8))
 
     def observe_a_frame(self, image):
         '''

@@ -85,3 +85,23 @@ If you want to cite our [**paper**](https://arxiv.org/pdf/1612.01079.pdf), pleas
   year={2016}
 }
 ```
+
+##Running DBB on collisions:
+### Data Preparation:
+Download and unzip the dataset's collisions (tagged as 1) and hard brakes (0) set into some directory $DATA_ROOT. There should be directories like $DATA_ROOT/0/test and $DATA_ROOT/1/train, etc.
+
+Then run the following commands to generate indexes of videos and convert raw videos to TFRecords. For collision set:
+```
+cd $BDD_ROOT"/data_prepare"
+python filter_cd.py --dataset_path=$DATA_ROOT --video_duration=2
+python prepare_tfrecords_cd.py --video_label=collision --video_index=$DATA_ROOT/1/train/video_filtered_2.txt --output_directory=$DATA_ROOT/train/tfrecords //all tfrecord will be at the same dir - both collisions and non-collisions
+python prepare_tfrecords_cd.py --video_label=hard_brake --video_index=$DATA_ROOT/0/train/video_filtered_2.txt --output_directory=$DATA_ROOT/train/tfrecords
+python run_pretrained.py --input_directory=$DATA_ROOT/train/tfrecords --model_name=discrete_tcnn1 --model_path=$BDD_ROOT/data/discrete_tcnn1/model.ckpt-126001.bestmodel
+```
+and on the training set:
+```
+cd $BDD_ROOT"/data_prepare"
+python filter.py $DATA_ROOT/hardBrakes
+python prepare_tfrecords.py --video_index=$DATA_ROOT/hardBrakes/video_filtered_38_60.txt --output_directory=$DATA_ROOT/tfrecords/hardBrakes
+```
+

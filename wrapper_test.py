@@ -29,14 +29,12 @@ def main():
 
     for i in range(len(encoded)):
         if i % 5 == 0:
-            file_jpgdata = StringIO(encoded[0])
+            file_jpgdata = StringIO(encoded[i])
             dt = Image.open(file_jpgdata)
             arr = np.asarray(dt)
             out = a.observe_a_frame(arr)
             print out
             print i / 5
-
-
 
 if __name__ == '__main__':
   main()

@@ -94,9 +94,10 @@ Then run the following commands to generate indexes of videos and convert raw vi
 ```
 cd $BDD_ROOT"/data_prepare"
 python filter_cd.py --dataset_path=$DATA_ROOT --video_duration=2
-python prepare_tfrecords_cd.py --video_label=collision --video_index=$DATA_ROOT/1/train/video_filtered_2.txt --output_directory=$DATA_ROOT/train/tfrecords //all tfrecord will be at the same dir - both collisions and non-collisions
-python prepare_tfrecords_cd.py --video_label=hard_brake --video_index=$DATA_ROOT/0/train/video_filtered_2.txt --output_directory=$DATA_ROOT/train/tfrecords
-python run_pretrained.py --input_directory=$DATA_ROOT/train/tfrecords --model_name=discrete_tcnn1 --model_path=$BDD_ROOT/data/discrete_tcnn1/model.ckpt-126001.bestmodel
+python prepare_tfrecords_cd.py --video_index=$DATA_ROOT/1/train/video_filtered_2.txt --output_directory=$DATA_ROOT/1/train/tfrecords
+python prepare_tfrecords_cd.py --video_index=$DATA_ROOT/0/train/video_filtered_2.txt --output_directory=$DATA_ROOT/0/train/tfrecords
+python run_pretrained.py --input_directory=$DATA_ROOT/0/train/tfrecords --model_name=discrete_tcnn1 --model_path=$BDD_ROOT/data/discrete_tcnn1/model.ckpt-126001.bestmodel
+python run_pretrained.py --input_directory=$DATA_ROOT/1/train/tfrecords --model_name=discrete_tcnn1 --model_path=$BDD_ROOT/data/discrete_tcnn1/model.ckpt-126001.bestmodel
 ```
 and on the training set:
 ```

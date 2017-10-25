@@ -26,7 +26,6 @@ import multiprocessing
 
 tf.app.flags.DEFINE_string('video_index', '/data/nx-bdd-20160929/video_filtered_index_38_60_sec.txt', 'filtered video indexing')
 tf.app.flags.DEFINE_string('output_directory', '/data/nx-bdd-20160929/tfrecord_fix_speed/', 'Training data directory')
-tf.app.flags.DEFINE_string('video_label', 'collision', 'videos label')
 
 #tf.app.flags.DEFINE_integer('train_shards', 1024, 'Number of shards in training TFRecord files.') 
 #tf.app.flags.DEFINE_integer('validation_shards', 128, 'Number of shards in validation TFRecord files.')
@@ -225,7 +224,6 @@ def read_one_video(video_path, jobid):
             'image/class/video_name':_bytes_feature([video_path]),
             'image/format':_bytes_feature(['JPEG']),
             'image/encoded': _bytes_feature(image_list),
-            'image/label': _int64_feature(1 if FLAGS.video_label == 'collision' else 0)
             #'image/encoded_orig': _bytes_feature(image_list_orig),
         }))
     else:
@@ -236,7 +234,6 @@ def read_one_video(video_path, jobid):
             'image/class/video_name':_bytes_feature([video_path]),
             'image/format':_bytes_feature(['JPEG']),
             'image/encoded': _bytes_feature(image_list),
-            'image/label': _int64_feature(1 if FLAGS.video_label == 'collision' else 0)
         }))
 
     print(video_path)

@@ -7,6 +7,7 @@ import numpy as np
 import argparse as _argparse
 import os
 import wrapper
+import itertools
 
 parser = _argparse.ArgumentParser()
 parser.add_argument('--input_directory',
@@ -56,7 +57,6 @@ if __name__ == '__main__':
                 example.ParseFromString(example_serialized)
                 feature_map = example.features.feature
                 encoded = feature_map['image/encoded'].bytes_list.value
-                label = feature_map['image/label'].int64_list.value[0]#Hanna - test it
                 print count
                 count += 1
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                     print i / 5
 
             out_line = ""
-            for output in model_out:
-                out_line += ','.join(str(e) for e in output) + ','
+            res = list(itertools.chain.from_iterable(model_out))
+            out_line += ','.join(str(e) for e in res)
             with open(model_out_name, "a") as myfile:
-                myfile.write(out_line + str(label) + '\n')
+                myfile.write(out_line + '\n')

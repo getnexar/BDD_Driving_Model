@@ -53,8 +53,10 @@ def run_pretrained(label, data_type):
 if __name__ == '__main__':
     args = parser.parse_args()
 
+    print 'running filter step'
     filter()
 
+    print 'running prepare_tfrecords step'
     prepare_tfrecords('0', 'train')
     prepare_tfrecords('1', 'train')
     prepare_tfrecords('0', 'validation')
@@ -62,6 +64,7 @@ if __name__ == '__main__':
     prepare_tfrecords('0', 'test')
     prepare_tfrecords('1', 'test')
 
+    print 'running run_pretrained step'
     run_pretrained('0', 'train')
     run_pretrained('1', 'train')
     run_pretrained('0', 'validation')

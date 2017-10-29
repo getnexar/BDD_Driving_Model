@@ -68,7 +68,7 @@ def _bytes_feature(value):
 
 
 def probe_file(filename):
-    cmnd = ['/usr/local/bin/ffprobe', '-show_format', '-show_streams', '-pretty', filename]
+    cmnd = ['ffprobe', '-show_format', '-show_streams', '-pretty', filename]
     p = subprocess.Popen(cmnd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # print filename
     out, err = p.communicate()
@@ -126,7 +126,7 @@ def read_one_video(video_path, jobid):
 
     # save the speed field
     json_path = os.path.join(os.path.dirname(fd), "info", fprefix + ".json")
-    acc_path = os.path.join(os.path.dirname(fd), "info", fprefix + ".csv")
+    acc_path = os.path.join(os.path.dirname(fd), "info", fprefix + ".acc")
     speeds, acc = get_interpolated_sensor_data(json_path, acc_path, fprefix + ".mov", hz_res)
     # acc = get_interpolated_acc(acc_path, speeds.shape[0], hz_res)
     if speeds is None:
@@ -218,7 +218,7 @@ def read_one_video(video_path, jobid):
             shutil.rmtree(cache_images)
         os.mkdir(cache_images)
 
-        call(['/usr/local/bin/ffmpeg',
+        call(['ffmpeg',
               '-i', video_path,
               '-r', '15',
               '-qscale:v', '10',
@@ -251,7 +251,7 @@ def read_one_video(video_path, jobid):
             'image/encoded': _bytes_feature(image_list),
             # 'image/encoded_orig': _bytes_feature(image_list_orig),
             'image/speeds': _float_feature(speeds.ravel().tolist()),  # ravel l*2 into list,
-            'image/acc': _float_feature(acc.ravel().tolist()),  # ravel l*2 into list
+            # 'image/acc': _float_feature(acc.ravel().tolist()),  # ravel l*2 into list
         }))
     else:
         example = tf.train.Example(features=tf.train.Features(feature={
@@ -262,7 +262,7 @@ def read_one_video(video_path, jobid):
             'image/format': _bytes_feature(['JPEG']),
             'image/encoded': _bytes_feature(image_list),
             'image/speeds': _float_feature(speeds.ravel().tolist()),  # ravel l*2 into list
-            'image/acc': _float_feature(acc.ravel().tolist()),  # ravel l*2 into list
+            # 'image/acc': _float_feature(acc.ravel().tolist()),  # ravel l*2 into list
         }))
 
     print(video_path)

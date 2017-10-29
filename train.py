@@ -343,7 +343,7 @@ def train():
                     grad_var_list = None
 
           # Reuse variables for the next tower.
-          tf.get_variable_scope().reuse_variables()
+          # tf.get_variable_scope().reuse_variables()
 
           # Retain the summaries from the final tower.
           summaries = tf.get_collection(tf.GraphKeys.SUMMARIES, scope)
@@ -442,7 +442,7 @@ def train():
     saver = tf.train.Saver(tf.all_variables())
 
     # Build the summary operation from the last tower summaries.
-    summary_op = tf.merge_summary(summaries)
+    summary_op = tf.summary.merge(summaries)
 
     # Build an initialization operation to run below.
     init = tf.global_variables_initializer()
@@ -491,7 +491,7 @@ def train():
     tf.train.start_queue_runners(sess=sess)
     
 
-    summary_writer = tf.train.SummaryWriter(
+    summary_writer = tf.summary.FileWriter(
         FLAGS.train_dir,
         graph_def=sess.graph.as_graph_def(add_shapes=True))
 

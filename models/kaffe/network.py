@@ -313,6 +313,7 @@ class Network(object):
 
         # channel swap
         reverse_dim = [False for _ in range(shape.ndims - 1)] + [True]
+        reverse_dim = [shape.ndims - 1]
         images = tf.reverse(images, reverse_dim)
 
         # cast type

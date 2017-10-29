@@ -9,8 +9,8 @@ import tensorflow as tf
 FLAGS = tf.app.flags.FLAGS
 
 ############################Set those path before use###################################
-FLAGS.pretrained_model_path = "/data/yang/si/data/pretrained_models/tf.caffenet.bin"
-FLAGS.data_dir = "/data/yang_cache/tfrecord_release/tfrecords"
+FLAGS.pretrained_model_path = "/opt/project/input-example/0/tf.caffenet.bin"
+FLAGS.data_dir = "/opt/project/input-example/0"
 
 # for privilege training: segmentation image index and labels
 train_city_image_list = '/backup/BDDNexar/Harry_config/Color_train_harry.txt'
@@ -377,7 +377,7 @@ def common_config_post(phase):
     FLAGS.checkpoint_dir = FLAGS.train_dir
 
 def train():
-    call(["python", "train.py"] + flags_to_cmd())
+    call(["python", "/opt/project/train.py"] + flags_to_cmd())
 
 def eval():
     call(["python", "eval.py"] + flags_to_cmd())

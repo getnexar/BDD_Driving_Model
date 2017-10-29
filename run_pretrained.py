@@ -81,4 +81,4 @@ if __name__ == '__main__':
             res = list(itertools.chain.from_iterable(model_out))
             out_line += ','.join(str(e) for e in res)
             with open(model_out_name, "a") as myfile:
-                myfile.write(out_line + '\n')
+                myfile.write( fprefix + ","+ out_line + '\n')
